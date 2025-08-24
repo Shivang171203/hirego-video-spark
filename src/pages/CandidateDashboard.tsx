@@ -4,49 +4,44 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Video, Clock, CheckCircle, Play, Briefcase } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import {
+  getCandidateDashboardJobs,
+  getCandidateDashboardStats,
+  getCandidateDashboardActivity,
+} from "@/services/api";
 
-const availableJobs = [
-  {
-    id: 1,
-    title: "Frontend Developer",
-    company: "TechCorp",
-    location: "Remote",
-    salary: "$80,000 - $120,000",
-    skills: ["React", "TypeScript", "Tailwind CSS"],
-    questions: 5,
-    duration: "8-10 minutes",
-    status: "available",
-  },
-  {
-    id: 2,
-    title: "Data Scientist",
-    company: "DataFlow Inc",
-    location: "San Francisco, CA",
-    salary: "$100,000 - $140,000",
-    skills: ["Python", "Machine Learning", "SQL"],
-    questions: 7,
-    duration: "10-12 minutes",
-    status: "available",
-  },
-  {
-    id: 3,
-    title: "Product Manager",
-    company: "StartupX",
-    location: "New York, NY",
-    salary: "$90,000 - $130,000",
-    skills: ["Strategy", "Agile", "Leadership"],
-    questions: 6,
-    duration: "8-10 minutes",
-    status: "completed",
-  },
-];
 
 const CandidateDashboard = () => {
   const navigate = useNavigate();
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [stats, setStats] = useState<any>(null);
+  const [activity, setActivity] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      setLoading(true);
+      try {
+        const jobsRes = await getCandidateDashboardJobs();
+        setJobs(jobsRes.data || []);
+        const statsRes = await getCandidateDashboardStats();
+        setStats(statsRes.data || null);
+        const activityRes = await getCandidateDashboardActivity();
+        setActivity(activityRes.data || []);
+      } catch (err) {
+        // Optionally handle error
+      }
+      setLoading(false);
+    }
+    fetchData();
+  }, []);
 
   const handleStartVideo = (jobId: number) => {
     navigate(`/candidate/video-recording/${jobId}`);
   };
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -67,7 +62,7 @@ const CandidateDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4">
-              {availableJobs.map((job) => (
+              {jobs.map((job) => (
                 <div
                   key={job.id}
                   className="border rounded-lg p-4 hover:shadow-md transition-shadow"
@@ -92,7 +87,7 @@ const CandidateDashboard = () => {
                         {job.salary}
                       </p>
                       <div className="flex flex-wrap gap-2 mb-3">
-                        {job.skills.map((skill) => (
+                        {job.skills && job.skills.map((skill: string) => (
                           <Badge key={skill} variant="secondary" className="text-xs">
                             {skill}
                           </Badge>
@@ -140,15 +135,15 @@ const CandidateDashboard = () => {
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Videos Completed</span>
-                  <span className="font-medium">1</span>
+                  <span className="font-medium">{stats?.videosCompleted ?? '-'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Average AI Score</span>
-                  <span className="font-medium text-green-600">95%</span>
+                  <span className="font-medium text-green-600">{stats?.averageAiScore ? `${stats.averageAiScore}%` : '-'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Applications Sent</span>
-                  <span className="font-medium">3</span>
+                  <span className="font-medium">{stats?.applicationsSent ?? '-'}</span>
                 </div>
               </div>
             </CardContent>
@@ -174,10 +169,12 @@ const CandidateDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-2 text-sm">
-                <p className="text-gray-600">Product Manager video completed</p>
-                <p className="text-gray-500 text-xs">2 hours ago</p>
-                <p className="text-gray-600">Frontend Developer application viewed</p>
-                <p className="text-gray-500 text-xs">1 day ago</p>
+                {activity.map((item, idx) => (
+                  <div key={idx}>
+                    <p className="text-gray-600">{item.message}</p>
+                    <p className="text-gray-500 text-xs">{item.time}</p>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>

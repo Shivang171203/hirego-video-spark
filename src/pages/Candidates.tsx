@@ -1,53 +1,58 @@
 
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Video, MessageSquare, Calendar, Star } from "lucide-react";
-
-const candidates = [
-  {
-    id: 1,
-    name: "Sarah Johnson",
-    email: "sarah.johnson@email.com",
-    position: "Frontend Developer",
-    experience: "3 years",
-    location: "San Francisco, CA",
-    aiMatch: 95,
-    status: "Active",
-    hasVideoResume: true,
-    rating: 4.8,
-    skills: ["React", "TypeScript", "Node.js"],
-  },
-  {
-    id: 2,
-    name: "Michael Chen",
-    email: "michael.chen@email.com",
-    position: "Data Scientist",
-    experience: "5 years",
-    location: "New York, NY",
-    aiMatch: 88,
-    status: "Interviewing",
-    hasVideoResume: true,
-    rating: 4.6,
-    skills: ["Python", "Machine Learning", "SQL"],
-  },
-  {
-    id: 3,
-    name: "Emily Rodriguez",
-    email: "emily.rodriguez@email.com",
-    position: "Product Manager",
-    experience: "4 years",
-    location: "Austin, TX",
-    aiMatch: 92,
-    status: "Shortlisted",
-    hasVideoResume: true,
-    rating: 4.9,
-    skills: ["Strategy", "Agile", "Analytics"],
-  },
-];
+import { Video, MessageSquare, Calendar, Star, Loader2 } from "lucide-react";
+import { getCandidates, Candidate } from "@/services/api";
 
 const Candidates = () => {
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCandidates = async () => {
+      try {
+        setLoading(true);
+        const response = await getCandidates();
+        setCandidates(response.data);
+        setError(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch candidates');
+        console.error('Error fetching candidates:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCandidates();
+  }, []);
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center space-x-2">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span>Loading candidates...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">Error: {error}</p>
+          <Button onClick={() => window.location.reload()}>
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -79,7 +84,7 @@ const Candidates = () => {
                     <p className="text-sm text-muted-foreground">{candidate.position}</p>
                   </div>
                 </div>
-                {candidate.hasVideoResume && (
+                {candidate.has_video_resume && (
                   <Video className="h-5 w-5 text-blue-600" />
                 )}
               </div>
@@ -89,10 +94,10 @@ const Candidates = () => {
                 <div>
                   <div className="text-sm font-medium">AI Match Score</div>
                   <div className={`text-xl font-bold ${
-                    candidate.aiMatch >= 90 ? 'text-green-600' : 
-                    candidate.aiMatch >= 80 ? 'text-yellow-600' : 'text-red-600'
+                    candidate.ai_match_score >= 90 ? 'text-green-600' : 
+                    candidate.ai_match_score >= 80 ? 'text-yellow-600' : 'text-red-600'
                   }`}>
-                    {candidate.aiMatch}%
+                    {candidate.ai_match_score}%
                   </div>
                 </div>
                 <div className="text-right">
@@ -100,7 +105,7 @@ const Candidates = () => {
                     <Star className="h-4 w-4 text-yellow-500 fill-current" />
                     <span className="text-sm font-medium">{candidate.rating}</span>
                   </div>
-                  <div className="text-sm text-muted-foreground">{candidate.experience}</div>
+                  <div className="text-sm text-muted-foreground">{candidate.experience_years} years</div>
                 </div>
               </div>
 

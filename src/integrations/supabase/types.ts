@@ -14,22 +14,95 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
-    }
+      candidates: {
+        Row: {
+          id: number;
+          name: string;
+          email: string;
+          position: string;
+          experience_years: number;
+          location: string;
+          ai_match_score: number;
+          status: 'Active' | 'Interviewing' | 'Shortlisted' | 'Rejected' | 'Hired';
+          has_video_resume: boolean;
+          rating: number;
+          skills: string[];
+          phone: string | null;
+          linkedin_url: string | null;
+          github_url: string | null;
+          portfolio_url: string | null;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: number;
+          name: string;
+          email: string;
+          position: string;
+          experience_years: number;
+          location: string;
+          ai_match_score?: number;
+          status?: 'Active' | 'Interviewing' | 'Shortlisted' | 'Rejected' | 'Hired';
+          has_video_resume?: boolean;
+          rating?: number;
+          skills?: string[];
+          phone?: string | null;
+          linkedin_url?: string | null;
+          github_url?: string | null;
+          portfolio_url?: string | null;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: number;
+          name?: string;
+          email?: string;
+          position?: string;
+          experience_years?: number;
+          location?: string;
+          ai_match_score?: number;
+          status?: 'Active' | 'Interviewing' | 'Shortlisted' | 'Rejected' | 'Hired';
+          has_video_resume?: boolean;
+          rating?: number;
+          skills?: string[];
+          phone?: string | null;
+          linkedin_url?: string | null;
+          github_url?: string | null;
+          portfolio_url?: string | null;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+    };
     Views: {
       [_ in never]: never
-    }
+    };
     Functions: {
-      [_ in never]: never
-    }
+      get_candidate_stats: {
+        Args: Record<string, never>;
+        Returns: {
+          total: number;
+          active: number;
+          interviewing: number;
+          shortlisted: number;
+          rejected: number;
+          hired: number;
+          with_video_resume: number;
+          average_ai_match: number;
+        }[];
+      };
+    };
     Enums: {
       [_ in never]: never
-    }
+    };
     CompositeTypes: {
       [_ in never]: never
-    }
-  }
-}
+    };
+  };
+};
 
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
